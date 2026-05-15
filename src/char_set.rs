@@ -1,5 +1,5 @@
-use raylib::prelude::*;
 use raylib::core::texture::Texture2D;
+use raylib::prelude::*;
 
 #[repr(u8)]
 #[derive(Clone, Copy)]

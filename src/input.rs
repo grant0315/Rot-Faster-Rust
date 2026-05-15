@@ -3,11 +3,15 @@ use raylib::prelude::*;
 pub enum Direction {
     Up,
     Down,
-    Left, 
-    Right
+    Left,
+    Right,
 }
 
-pub fn get_movement_input(rl: &RaylibHandle, player_tile_x: i32, player_tile_y: i32) -> Option<Direction> {
+pub fn get_movement_input(
+    rl: &RaylibHandle,
+    player_tile_x: i32,
+    player_tile_y: i32,
+) -> Option<Direction> {
     // Check for keyboard input first
     if let Some(direction) = check_grid_key_movement(rl) {
         return Some(direction);
@@ -39,7 +43,11 @@ fn check_grid_key_movement(rl: &RaylibHandle) -> Option<Direction> {
     None
 }
 
-fn check_grid_mouse_movement(rl: &RaylibHandle, player_tile_x: i32, player_tile_y: i32) -> Option<Direction> {
+fn check_grid_mouse_movement(
+    rl: &RaylibHandle,
+    player_tile_x: i32,
+    player_tile_y: i32,
+) -> Option<Direction> {
     let mouse_x = rl.get_mouse_x();
     let mouse_y = rl.get_mouse_y();
 

@@ -1,7 +1,7 @@
-use raylib::prelude::*;
-use crate::item::Item;
 use crate::input::Direction;
+use crate::item::Item;
 use crate::level_generation;
+use raylib::prelude::*;
 
 pub struct Player {
     pub tile_pos_x: i32,
@@ -32,7 +32,8 @@ impl Player {
         // Movement and other logic would go here
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle) { // Draw the player character at its current position For example, you could draw a simple rectangle or a sprite
+    pub fn draw(&self, d: &mut RaylibDrawHandle) {
+        // Draw the player character at its current position For example, you could draw a simple rectangle or a sprite
         d.draw_rectangle(
             self.tile_pos_x * 16,
             self.tile_pos_y * 16,
@@ -70,7 +71,6 @@ impl Player {
         // If we passed both checks, the player can move there
         true
     }
-        
 
     fn check_out_of_bounds(&self, max_x: i32, max_y: i32) -> bool {
         self.tile_pos_x < 0

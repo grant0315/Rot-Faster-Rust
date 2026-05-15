@@ -1,4 +1,4 @@
-use crate::char_set::{Glyph, CharSet};
+use crate::char_set::{CharSet, Glyph};
 use raylib::prelude::*;
 
 #[derive(Clone)]
@@ -23,7 +23,11 @@ pub struct GlyphBuffer {
 
 impl GlyphBuffer {
     pub fn new(char_set: CharSet, glyph_w: i32, glyph_h: i32, cols: i32, rows: i32) -> Self {
-        let cell = Cell { glyph: None, fg: Color::WHITE, bg: Color::BLACK };
+        let cell = Cell {
+            glyph: None,
+            fg: Color::WHITE,
+            bg: Color::BLACK,
+        };
         GlyphBuffer {
             char_set,
             glyph_w,
@@ -66,7 +70,10 @@ impl GlyphBuffer {
     /// Convert pixel coordinates to grid (col, row), accounting for
     /// the centring offset used when aspect-ratio clamping is active.
     pub fn pixel_to_grid(&self, px: i32, py: i32) -> (i32, i32) {
-        ((px - self.offset_x) / self.glyph_w, (py - self.offset_y) / self.glyph_h)
+        (
+            (px - self.offset_x) / self.glyph_w,
+            (py - self.offset_y) / self.glyph_h,
+        )
     }
 
     /// Draw a CP437 single-line box into the grid.
@@ -95,7 +102,15 @@ impl GlyphBuffer {
     }
 
     /// Like `put_text` but wraps at a custom `max_col` instead of the screen edge.
-    pub fn put_text_bounded(&mut self, text: &str, col: i32, row: i32, max_col: i32, fg: Color, bg: Color) {
+    pub fn put_text_bounded(
+        &mut self,
+        text: &str,
+        col: i32,
+        row: i32,
+        max_col: i32,
+        fg: Color,
+        bg: Color,
+    ) {
         let mut current_row = row;
         for line in text.lines() {
             if current_row >= self.rows {
@@ -106,7 +121,15 @@ impl GlyphBuffer {
         }
     }
 
-    fn put_text_line_bounded(&mut self, text: &str, col: i32, row: i32, max_col: i32, fg: Color, bg: Color) {
+    fn put_text_line_bounded(
+        &mut self,
+        text: &str,
+        col: i32,
+        row: i32,
+        max_col: i32,
+        fg: Color,
+        bg: Color,
+    ) {
         if text.is_empty() {
             return;
         }
@@ -160,7 +183,14 @@ impl GlyphBuffer {
 
     /// Write text starting at a grid position.  Wraps on word boundaries;
     /// clips at the screen bottom.
-    pub fn put_text(&mut self, text: &str, starting_col: i32, starting_row: i32, fg: Color, bg: Color) {
+    pub fn put_text(
+        &mut self,
+        text: &str,
+        starting_col: i32,
+        starting_row: i32,
+        fg: Color,
+        bg: Color,
+    ) {
         let mut row = starting_row;
         for line in text.lines() {
             if row >= self.rows {
@@ -218,17 +248,23 @@ impl GlyphBuffer {
             let w = self.glyph_w as f32;
             let h = self.glyph_h as f32;
 
-            d.draw_rectangle_v(
-                Vector2 { x, y },
-                Vector2 { x: w, y: h },
-                cell.bg,
-            );
+            d.draw_rectangle_v(Vector2 { x, y }, Vector2 { x: w, y: h }, cell.bg);
 
             if let Some(code) = cell.glyph {
                 d.draw_texture_pro(
                     self.char_set.get(code),
-                    Rectangle { x: 0.0, y: 0.0, width: 16.0, height: 16.0 },
-                    Rectangle { x, y, width: w, height: h },
+                    Rectangle {
+                        x: 0.0,
+                        y: 0.0,
+                        width: 16.0,
+                        height: 16.0,
+                    },
+                    Rectangle {
+                        x,
+                        y,
+                        width: w,
+                        height: h,
+                    },
                     Vector2 { x: 0.0, y: 0.0 },
                     0.0,
                     cell.fg,

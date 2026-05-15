@@ -52,11 +52,19 @@ pub enum UIElement {
 
 impl UIElement {
     pub fn text(text: impl Into<String>) -> Self {
-        UIElement::Text { text: text.into(), border: false, rect: Rect::default() }
+        UIElement::Text {
+            text: text.into(),
+            border: false,
+            rect: Rect::default(),
+        }
     }
 
     pub fn text_bordered(text: impl Into<String>) -> Self {
-        UIElement::Text { text: text.into(), border: true, rect: Rect::default() }
+        UIElement::Text {
+            text: text.into(),
+            border: true,
+            rect: Rect::default(),
+        }
     }
 
     pub fn button(id: impl Into<String>, label: impl Into<String>) -> Self {
@@ -69,11 +77,21 @@ impl UIElement {
     }
 
     pub fn vstack(children: Vec<UIElement>, gap: i32) -> Self {
-        UIElement::VStack { children, gap, border: false, rect: Rect::default() }
+        UIElement::VStack {
+            children,
+            gap,
+            border: false,
+            rect: Rect::default(),
+        }
     }
 
     pub fn vstack_bordered(children: Vec<UIElement>, gap: i32) -> Self {
-        UIElement::VStack { children, gap, border: true, rect: Rect::default() }
+        UIElement::VStack {
+            children,
+            gap,
+            border: true,
+            rect: Rect::default(),
+        }
     }
 }
 
@@ -98,25 +116,40 @@ fn measure_element(element: &UIElement) -> (i32, i32) {
     match element {
         UIElement::Text { text, border, .. } => {
             let (tw, th) = measure_text(text);
-            if *border { (tw + 2, th + 2) } else { (tw, th) }
+            if *border {
+                (tw + 2, th + 2)
+            } else {
+                (tw, th)
+            }
         }
         UIElement::Button { label, .. } => {
             let (tw, th) = measure_text(label);
             (tw + 2, th + 2)
         }
-        UIElement::VStack { children, gap, border, .. } => {
+        UIElement::VStack {
+            children,
+            gap,
+            border,
+            ..
+        } => {
             let mut max_w = 0i32;
             let mut total_h = 0i32;
             for child in children {
                 let (cw, ch) = measure_element(child);
-                if cw > max_w { max_w = cw; }
+                if cw > max_w {
+                    max_w = cw;
+                }
                 total_h += ch;
             }
             let n = children.len() as i32;
             if n > 1 {
                 total_h += gap * (n - 1);
             }
-            if *border { (max_w + 2, total_h + 2) } else { (max_w, total_h) }
+            if *border {
+                (max_w + 2, total_h + 2)
+            } else {
+                (max_w, total_h)
+            }
         }
     }
 }
@@ -139,22 +172,42 @@ pub fn draw(
             if *border {
                 let w = tw + 2;
                 let h = th + 2;
-                *rect = Rect { col, row, width: w, height: h };
+                *rect = Rect {
+                    col,
+                    row,
+                    width: w,
+                    height: h,
+                };
                 gb.put_box(col, row, w, h, fg, bg);
                 gb.put_text_bounded(text, col + 1, row + 1, col + w - 1, fg, bg);
                 (w, h)
             } else {
-                *rect = Rect { col, row, width: tw, height: th };
+                *rect = Rect {
+                    col,
+                    row,
+                    width: tw,
+                    height: th,
+                };
                 gb.put_text(text, col, row, fg, bg);
                 (tw, th)
             }
         }
 
-        UIElement::Button { id: _, label, state, rect } => {
+        UIElement::Button {
+            id: _,
+            label,
+            state,
+            rect,
+        } => {
             let (tw, th) = measure_text(label);
             let w = tw + 2;
             let h = th + 2;
-            *rect = Rect { col, row, width: w, height: h };
+            *rect = Rect {
+                col,
+                row,
+                width: w,
+                height: h,
+            };
 
             let (box_fg, box_bg) = match *state {
                 ButtonState::Normal => (fg, bg),
@@ -167,19 +220,33 @@ pub fn draw(
             (w, h)
         }
 
-        UIElement::VStack { children, gap, border, rect } => {
+        UIElement::VStack {
+            children,
+            gap,
+            border,
+            rect,
+        } => {
             let mut max_w = 0i32;
             let mut total_h = 0i32;
             for child in children.iter() {
                 let (cw, ch) = measure_element(child);
-                if cw > max_w { max_w = cw; }
+                if cw > max_w {
+                    max_w = cw;
+                }
                 total_h += ch;
             }
             let n = children.len() as i32;
-            if n > 1 { total_h += *gap * (n - 1); }
+            if n > 1 {
+                total_h += *gap * (n - 1);
+            }
             let mw = if *border { max_w + 2 } else { max_w };
             let mh = if *border { total_h + 2 } else { total_h };
-            *rect = Rect { col, row, width: mw, height: mh };
+            *rect = Rect {
+                col,
+                row,
+                width: mw,
+                height: mh,
+            };
 
             let inner_col = col + if *border { 1 } else { 0 };
             let mut cy = row + if *border { 1 } else { 0 };
@@ -210,7 +277,9 @@ pub fn update(
     match element {
         UIElement::Text { .. } => None,
 
-        UIElement::Button { id, state, rect, .. } => {
+        UIElement::Button {
+            id, state, rect, ..
+        } => {
             let inside = rect.contains(mouse_col, mouse_row);
             match *state {
                 ButtonState::Pressed => {

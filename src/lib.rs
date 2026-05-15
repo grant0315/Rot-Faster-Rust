@@ -1,7 +1,9 @@
 pub mod char_set;
 pub mod glyph_buffer;
+pub mod input;
+pub mod item;
 pub mod level_generation;
 pub mod player;
-pub mod item;
-pub mod input;
+pub mod scene;
+pub mod scene_manager;
 pub mod ui;
