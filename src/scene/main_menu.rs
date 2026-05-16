@@ -85,7 +85,11 @@ impl Scene for MainMenu {
                 "test" => self.current_ui = self.test_menu.clone(),
                 "cell" => self.current_ui = self.cell_menu.clone(),
                 "back" => self.current_ui = self.ui.clone(),
-                "new" => return SceneResult::Push(Box::new(super::game::GameScene::new())),
+                "new" => {
+                    let cols = scene_ctx.glyph_buffer.cols as usize;
+                    let rows = scene_ctx.glyph_buffer.rows as usize;
+                    return SceneResult::Push(Box::new(super::game::GameScene::new(cols, rows)));
+                }
                 _ => {}
             }
         }
@@ -93,12 +97,21 @@ impl Scene for MainMenu {
         SceneResult::None
     }
 
-    fn draw(&mut self, d: &mut RaylibDrawHandle, scene_ctx: &mut SceneContext) {
+    fn draw(&mut self, _d: &mut RaylibDrawHandle, scene_ctx: &mut SceneContext) {
+        scene_ctx.glyph_buffer.clear(raylib::prelude::Color::BLACK);
+
+        // Get the current ui dimensions
+        let (ui_w, ui_h) = ui::measure_element(&self.current_ui);
+
+        // Center the UI in the window
+        let ui_x = (scene_ctx.glyph_buffer.cols - ui_w) / 2;
+        let ui_y = (scene_ctx.glyph_buffer.rows - ui_h) / 2;
+
         ui::draw(
             &mut scene_ctx.glyph_buffer,
             &mut self.current_ui,
-            24,
-            6,
+            ui_x,
+            ui_y,
             raylib::prelude::Color::WHITE,
             raylib::prelude::Color::BLACK,
         );

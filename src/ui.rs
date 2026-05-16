@@ -112,7 +112,8 @@ fn measure_text(text: &str) -> (i32, i32) {
     (max_chars, line_count)
 }
 
-fn measure_element(element: &UIElement) -> (i32, i32) {
+// Measures the size of the element and all its children, returning (width, height) in glyphs
+pub fn measure_element(element: &UIElement) -> (i32, i32) {
     match element {
         UIElement::Text { text, border, .. } => {
             let (tw, th) = measure_text(text);
