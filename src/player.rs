@@ -57,31 +57,11 @@ impl Player {
         }
     }
 
-    pub fn check_collision(&self, tile: &level_generation::Tile, max_x: i32, max_y: i32) -> bool {
-        // Check if the desired tile position is out of bounds
-        if self.check_out_of_bounds(max_x, max_y) {
-            return false;
-        }
-
-        // Check if the tile is a wall
-        if self.check_wall_collision(tile) {
-            return false;
-        }
-
-        // If we passed both checks, the player can move there
-        true
-    }
-
     fn check_out_of_bounds(&self, max_x: i32, max_y: i32) -> bool {
         self.tile_pos_x < 0
             || self.tile_pos_y < 0
             || self.tile_pos_x >= max_x as i32
             || self.tile_pos_y >= max_y as i32
-    }
-
-    fn check_wall_collision(&self, tile: &level_generation::Tile) -> bool {
-        // Check if the tile is a wall
-        matches!(tile.tile_type, level_generation::TileType::Wall)
     }
 
     pub fn take_damage(&mut self, amount: u32) {
