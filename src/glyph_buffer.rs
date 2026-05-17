@@ -170,7 +170,7 @@ impl GlyphBuffer {
     }
 
     /// Write a printable-ASCII character at grid position.
-    fn put_char(&mut self, col: i32, row: i32, c: char, fg: Color, bg: Color) {
+    pub fn put_char(&mut self, col: i32, row: i32, c: char, fg: Color, bg: Color) {
         let code = c as u8;
         if (0x20..=0x7E).contains(&code) {
             if let Some(cell) = self.cell_mut(col, row) {
