@@ -1,9 +1,8 @@
-use crate::input::Direction;
-use crate::item::Item;
-use crate::level_generation;
-use raylib::prelude::*;
 use crate::char_set::Glyph;
 use crate::glyph_buffer::GlyphBuffer;
+use crate::input::Direction;
+use crate::item::Item;
+use raylib::prelude::*;
 
 pub struct Player {
     pub tile_pos_x: i32,
@@ -36,7 +35,13 @@ impl Player {
 
     pub fn draw(&self, gb: &mut GlyphBuffer) {
         // Draw the player character at its current position For example, you could draw a simple rectangle or a sprite
-        gb.put_glyph(self.tile_pos_x, self.tile_pos_y, Glyph::Player, Color::WHITE, Color::BLACK);
+        gb.put_glyph(
+            self.tile_pos_x,
+            self.tile_pos_y,
+            Glyph::Player,
+            Color::WHITE,
+            Color::BLACK,
+        );
     }
 
     pub fn move_delta(&mut self, dx: i32, dy: i32) {

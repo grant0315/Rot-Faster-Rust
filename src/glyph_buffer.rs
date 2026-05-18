@@ -2,14 +2,15 @@ use crate::char_set::{CharSet, Glyph};
 use raylib::prelude::*;
 
 #[derive(Clone)]
-struct Cell {
-    glyph: Option<u8>,
+pub struct Cell {
+    pub glyph: Option<u8>,
     fg: Color,
     bg: Color,
 }
 
 /// A 2D character grid.  Call `clear` at the top of the frame, then
 /// `put_glyph` / `put_text` to populate, then `render` once to draw.
+#[derive()]
 pub struct GlyphBuffer {
     char_set: CharSet,
     pub glyph_w: i32,
@@ -18,7 +19,7 @@ pub struct GlyphBuffer {
     pub rows: i32,
     offset_x: i32,
     offset_y: i32,
-    grid: Vec<Cell>,
+    pub grid: Vec<Cell>,
 }
 
 impl GlyphBuffer {

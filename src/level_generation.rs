@@ -1,5 +1,5 @@
-use crate::glyph_buffer::GlyphBuffer;
 use crate::char_set::Glyph;
+use crate::glyph_buffer::GlyphBuffer;
 use raylib::prelude::Color;
 
 // A level is a 2D grid of tiles, along with the player's spawn point.
@@ -36,9 +36,16 @@ impl Level {
         }
     }
 
-    pub fn generate(&mut self, level_gen_algorithm: LevelGenAlgorithm, gbuf_width: usize, gbuf_height: usize) {
+    pub fn generate(
+        &mut self,
+        level_gen_algorithm: LevelGenAlgorithm,
+        gbuf_width: usize,
+        gbuf_height: usize,
+    ) {
         self.level_grid = match level_gen_algorithm {
-            LevelGenAlgorithm::CellularAutomataCave => cave_level_generation(gbuf_width, gbuf_height),
+            LevelGenAlgorithm::CellularAutomataCave => {
+                cave_level_generation(gbuf_width, gbuf_height)
+            }
         };
     }
 
@@ -57,6 +64,21 @@ impl Level {
             }
         }
     }
+
+    pub fn is_walkable(&self, tile_x: i32, tile_y: i32) -> bool {
+        if tile_x < 0
+            || tile_y < 0
+            || tile_x >= self.gbuf_width as i32
+            || tile_y >= self.gbuf_height as i32
+        {
+            return false;
+        }
+
+        match self.level_grid[tile_y as usize][tile_x as usize] {
+            TileType::Wall => false,
+            _ => true,
+        }
+    }
 }
 
 // Stadnard 4-5 step cellular automata cave generation algorithm.
@@ -68,7 +90,7 @@ impl Level {
 // 3. Optionally, add features like doors, stairs, or player spawn points after the main cave structure is generated.
 fn cave_level_generation(width: usize, height: usize) -> Vec<Vec<TileType>> {
     let mut grid = vec![vec![TileType::Wall; width]; height];
-    
+
     for row in 0..height {
         for col in 0..width {
             // Randomly assign walls and floors with about 45% walls.
@@ -83,19 +105,31 @@ fn cave_level_generation(width: usize, height: usize) -> Vec<Vec<TileType>> {
     // Apply cellular automata rules for a set number of iterations (e.g., 4-5).
     for _ in 0..5 {
         let mut new_grid = grid.clone();
-        
+
         for row in 0..height {
             for col in 0..width {
                 let wall_neighbors = count_wall_neighbors(&grid, row, col);
-                
+
                 new_grid[row][col] = match grid[row][col] {
-                    TileType::Wall => if wall_neighbors >= 4 { TileType::Wall } else { TileType::Floor },
-                    TileType::Floor => if wall_neighbors >= 5 { TileType::Wall } else { TileType::Floor },
+                    TileType::Wall => {
+                        if wall_neighbors >= 4 {
+                            TileType::Wall
+                        } else {
+                            TileType::Floor
+                        }
+                    }
+                    TileType::Floor => {
+                        if wall_neighbors >= 5 {
+                            TileType::Wall
+                        } else {
+                            TileType::Floor
+                        }
+                    }
                     other => other, // Keep other tile types unchanged.
                 };
             }
         }
-        
+
         grid = new_grid;
     }
 
@@ -104,13 +138,26 @@ fn cave_level_generation(width: usize, height: usize) -> Vec<Vec<TileType>> {
 
 fn count_wall_neighbors(grid: &Vec<Vec<TileType>>, row: usize, col: usize) -> usize {
     let mut count = 0;
-    let directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)];
-    
+    let directions = [
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ];
+
     for (dr, dc) in directions.iter() {
         let new_row = row as isize + dr;
         let new_col = col as isize + dc;
-        
-        if new_row >= 0 && new_row < grid.len() as isize && new_col >= 0 && new_col < grid[0].len() as isize {
+
+        if new_row >= 0
+            && new_row < grid.len() as isize
+            && new_col >= 0
+            && new_col < grid[0].len() as isize
+        {
             if grid[new_row as usize][new_col as usize] == TileType::Wall {
                 count += 1;
             }
@@ -119,6 +166,6 @@ fn count_wall_neighbors(grid: &Vec<Vec<TileType>>, row: usize, col: usize) -> us
             count += 1;
         }
     }
-    
+
     count
 }
