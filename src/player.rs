@@ -7,6 +7,7 @@ use raylib::prelude::*;
 pub struct Player {
     pub tile_pos_x: i32,
     pub tile_pos_y: i32,
+    pub facing: Direction,
     pub name: String,
     pub health: u32,
     pub mana: u32,
@@ -23,6 +24,7 @@ impl Player {
             name: name.to_string(),
             tile_pos_x: tile_pos_x,
             tile_pos_y: tile_pos_y,
+            facing: Direction::Down,
             health: 100,
             mana: 50,
             inventory: Inventory { items: vec![] },

@@ -4,8 +4,8 @@ use raylib::prelude::*;
 #[derive(Clone)]
 pub struct Cell {
     pub glyph: Option<u8>,
-    fg: Color,
-    bg: Color,
+    pub fg: Color,
+    pub bg: Color,
 }
 
 /// A 2D character grid.  Call `clear` at the top of the frame, then

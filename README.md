@@ -21,4 +21,15 @@ examples/
 | `cargo run --example demo` | Test demo — try the button, see containers wrap |
 | `cargo run` | The game (just a blank window for now) |
 
+## Assets
+
+REXPaint `.xp` files are synced from a Windows REXPaint images directory:
+
+```
+./sync_assets.sh
+```
+
+By default it reads from `/mnt/c/Users/grant/Downloads/REXPaint-v1.70/REXPaint-v1.70/images`.
+Override the path with the `REXPAINT_IMAGES_DIR` environment variable:
+
 The library (`lib.rs`) compiles `char_set` and `glyph_buffer` once. Both the game and the demo share the same code — fix a bug in the library and both benefit.

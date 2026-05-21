@@ -7,3 +7,4 @@ pub mod player;
 pub mod scene;
 pub mod scene_manager;
 pub mod ui;
+pub mod xp_parse;
