@@ -1,14 +1,52 @@
+use crate::glyph_buffer::GlyphBuffer;
 use crate::input::Direction;
 use crate::level_generation::{Level, LevelGenAlgorithm, TileType};
 use crate::player::Player;
 use crate::scene::{Scene, SceneContext, SceneResult};
+use crate::ui::{self, UIElement};
 use crate::xp_parse::{Sprite, XpFile};
 use raylib::prelude::{KeyboardKey, RaylibDrawHandle, RaylibHandle};
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RelativeWall {
     Front,
     LeftSide,
     RightSide,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct WallVisibility {
+    pub front: bool,
+    pub left: bool,
+    pub right: bool,
+}
+
+impl WallVisibility {
+    pub fn new() -> Self {
+        WallVisibility {
+            front: false,
+            left: false,
+            right: false,
+        }
+    }
+
+    pub fn any(&self) -> bool {
+        self.front || self.left || self.right
+    }
+
+    pub fn as_vec(&self) -> Vec<RelativeWall> {
+        let mut walls = Vec::new();
+        if self.front {
+            walls.push(RelativeWall::Front);
+        }
+        if self.left {
+            walls.push(RelativeWall::LeftSide);
+        }
+        if self.right {
+            walls.push(RelativeWall::RightSide);
+        }
+        walls
+    }
 }
 
 pub struct GameScene {
@@ -33,7 +71,7 @@ impl GameScene {
         let mut xp_file: XpFile = XpFile::new("assets/background.xp".to_string());
         let background_sprite: Sprite = xp_file.parse();
 
-        xp_file = XpFile::new("assets/stright-wall.xp".to_string());
+        xp_file = XpFile::new("assets/wall-center.xp".to_string());
         let middle_wall_sprite: Sprite = xp_file.parse();
 
         xp_file = XpFile::new("assets/wall-left.xp".to_string());
@@ -58,9 +96,7 @@ impl Scene for GameScene {
     fn update(&mut self, ctx: &mut RaylibHandle, _scene_ctx: &mut SceneContext) -> SceneResult {
         self.player.update();
 
-        if ctx.is_key_pressed(KeyboardKey::KEY_W)
-            || ctx.is_key_pressed(KeyboardKey::KEY_UP)
-        {
+        if ctx.is_key_pressed(KeyboardKey::KEY_W) || ctx.is_key_pressed(KeyboardKey::KEY_UP) {
             self.try_move_player(self.player.facing);
         } else if ctx.is_key_pressed(KeyboardKey::KEY_S)
             || ctx.is_key_pressed(KeyboardKey::KEY_DOWN)
@@ -94,22 +130,25 @@ impl Scene for GameScene {
         self.background_sprite
             .draw(&mut scene_ctx.glyph_buffer, 0, 0);
 
-        for wall in determine_player_wall_vis(&self.player, &self.level) {
-            match wall {
-                RelativeWall::Front => {
-                    self.middle_wall_sprite
-                        .draw(&mut scene_ctx.glyph_buffer, 0, 0);
-                }
-                RelativeWall::LeftSide => {
-                    self.left_wall_sprite
-                        .draw(&mut scene_ctx.glyph_buffer, 0, 0);
-                }
-                RelativeWall::RightSide => {
-                    self.right_wall_sprite
-                        .draw(&mut scene_ctx.glyph_buffer, 0, 0);
-                }
-            }
+        let walls = determine_player_wall_vis(&self.player, &self.level);
+
+        if walls.front {
+            self.middle_wall_sprite
+                .draw(&mut scene_ctx.glyph_buffer, 0, 0);
         }
+
+        if walls.left {
+            self.left_wall_sprite
+                .draw(&mut scene_ctx.glyph_buffer, 0, 0);
+        }
+
+        if walls.right {
+            self.right_wall_sprite
+                .draw(&mut scene_ctx.glyph_buffer, 0, 0);
+        }
+
+        // Draw ui
+        draw_ui(&mut scene_ctx.glyph_buffer, &mut self.player);
     }
 }
 
@@ -130,10 +169,9 @@ impl GameScene {
     }
 }
 
-fn determine_player_wall_vis(player: &Player, level: &Level) -> Vec<RelativeWall> {
+fn determine_player_wall_vis(player: &Player, level: &Level) -> WallVisibility {
     let px = player.tile_pos_x;
     let py = player.tile_pos_y;
-    let mut visible = Vec::new();
 
     let height = level.level_grid.len() as i32;
     let width = level.level_grid[0].len() as i32;
@@ -145,6 +183,13 @@ fn determine_player_wall_vis(player: &Player, level: &Level) -> Vec<RelativeWall
         Direction::Right => (1, 0, 0, -1, 0, 1),
     };
 
+    let is_wall = |x: i32, y: i32| -> bool {
+        if x < 0 || x >= width || y < 0 || y >= height {
+            return true;
+        }
+        level.level_grid[y as usize][x as usize] == TileType::Wall
+    };
+
     let fx = px + front_dx;
     let fy = py + front_dy;
     let lx = px + left_dx;
@@ -152,29 +197,36 @@ fn determine_player_wall_vis(player: &Player, level: &Level) -> Vec<RelativeWall
     let rx = px + right_dx;
     let ry = py + right_dy;
 
-    let is_wall = |x: i32, y: i32| -> bool {
-        x >= 0 && x < width && y >= 0 && y < height
-            && level.level_grid[y as usize][x as usize] == TileType::Wall
-    };
-
-    let has_front = is_wall(fx, fy);
-    let has_left = is_wall(lx, ly);
-    let has_right = is_wall(rx, ry);
+    let front = is_wall(fx, fy);
+    let left = is_wall(lx, ly);
+    let right = is_wall(rx, ry);
 
     eprintln!(
         "Facing: {:?}, Front: {}, Left: {}, Right: {}",
-        player.facing, has_front, has_left, has_right
+        player.facing, front, left, right
     );
 
-    if has_front {
-        visible.push(RelativeWall::Front);
-    }
-    if has_left {
-        visible.push(RelativeWall::LeftSide);
-    }
-    if has_right {
-        visible.push(RelativeWall::RightSide);
-    }
+    WallVisibility { front, left, right }
+}
 
-    visible
+fn draw_ui(gb: &mut GlyphBuffer, player: &Player) {
+    let hp_text: String = format!("HEALTH: {}", player.health);
+    let mana_text = format!("MANA: {}", player.mana);
+
+    let mut stats = UIElement::vstack_bordered(
+        vec![
+            UIElement::text_bordered(hp_text),
+            UIElement::text_bordered(mana_text),
+        ],
+        0,
+    );
+
+    ui::draw(
+        gb,
+        &mut stats,
+        40,
+        10,
+        raylib::prelude::Color::WHITE,
+        raylib::prelude::Color::BLACK,
+    );
 }
